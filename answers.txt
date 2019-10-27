@@ -1,0 +1,173 @@
+Part 1:
+1.1
+BUFF; UB; UF; MB; MF; LB; LF; as the region on the map
+Region(x):  where it is true when x is one of the region
+
+Region(a).
+Region(b)
+Adjacent(a, b): means region a is adjecent to region b and verse virsa !??
+
+1.2
+let Entity(x) be true for object of type agent, plate, and customer
+Entity(x).
+Region(r).
+At(x, r). 
+
+where At(x, r) means x is at r
+
+1.3
+Plate(p).
+HasFood(p).
+
+1.4
+
+Customer(c).
+isServed(c).
+
+1.5
+
+Region(BUFF),
+Region(UB),
+Region(UF),
+Region(MB),
+Region(MF),
+Region(LB),
+Region(LF),
+
+Adjacent(BUFF, UF),
+Adjacent(UF, BUFF),
+Adjacent(UF, UB),
+Adjacent(UF, MF),
+Adjacent(UB, UF),
+Adjacent(MF, UF),
+Adjacent(UB, MB),
+Adjacent(MB, UB),
+Adjacent(MF, LF),
+Adjacent(LF, MF),
+Adjacent(MB, LB),
+Adjacent(LB, MB),
+Adjacent(LB, LF),
+Adjacent(LF, LB),
+
+Agent(A),
+At(A,  BUFF),
+
+Plate(P),
+At(P, BUFF),
+
+Customer(C),
+At(C, LB),
+
+
+1.6
+
+Action(PickUp(a, r, p),
+	PRECOND: Agent(a) ∧ Plate(p) ∧ Region(r) ∧ ¬Holding(a, p) ∧ At(a, r) ∧ At(p, r)
+	EFFECT: Holding(a, p)
+)
+
+1.7
+
+Action(HandOver(a, r, p, c),
+	PRECOND: Agent(a) ∧ Region(r) ∧ Plate(p) ∧ Customer(c) ∧ Holding(a, p) ∧ At(a, r) ∧ At(c, r) ∧ At(p, r) ∧ hasFood(p)
+	EFFECT: ¬Holding(a, p) ∧ isServed(c)
+
+
+1.8
+
+Action(Fill(a, p),
+	PRECOND: Agent(a) ∧ Plate(p) ∧ At(a, BUFF) ∧ At(p, BUFF) ∧ ¬hasFood(p) ∧ Holding(a, p)
+	EFFECT: hasFood(p)
+)
+
+
+1.9
+
+Action(Move(a, from, to),
+	PRECOND: Agent(a) ∧ Region(from) ∧ Region(to) ∧ At(a, from) ∧ ¬(from=to) ∧ Adjacent(from, to)
+	EFFECT: ¬At(a, from) ∧ At(a, to)
+)
+
+
+1.10
+
+Init(
+	Agent(A) ∧ Region(BUFF) ∧ At(A, BUFF) ∧ plate(P) ∧ At(P, BUFF) ∧ Customer(C) ∧ Region(UF) ∧ At(C, UF)
+	∧ ¬isServed(C) ∧ ¬hasFood(P) -- negatives
+)
+Goal(isServed(C))
+
+
+---
+- g1: isServed(C)
+- Relevant Actions: HandOver(a, r, p, C)
+- Choose: HandOver(a, r, p, C)
+
+- g2 :  Agent(a) ∧ Region(r) ∧ Plate(p) ∧ Customer(C) ∧ Holding(a, p) ∧ At(a, r) ∧ At(C, r) ∧ hasFood(p)
+- Relevant Actions:
+	- Move(a, r', r)
+Choose:
+	- Move(a, r', r)
+
+
+- g3: Agent(a) ∧ Region(r) ∧ Plate(p) ∧ Customer(C) ∧ Holding(a, p) ∧ At(C, r) ∧ hasFood(p) ∧ 
+    Region(r') ∧ At(a, r') ∧ ¬(r'=r) ∧ Adjacent(r', r)
+- Relevant Actions:
+	- Fill(a, p)
+Choose:
+	- Fill(a, p)
+
+
+
+- g4 = Agent(a) ∧ Region(r) ∧ Plate(p) ∧ Customer(C) ∧ Holding(a, p) ∧ At(C, r) ∧ Region(r') ∧ At(a, r') ∧ ¬(r'=r) ∧ Adjacent(r', r) ∧ At(a, BUFF) ∧ At(p, BUFF) ∧ ¬hasFood(p) ∧ Holding(a, p)
+- Relevant Actions:
+	- PickUp(a, r', p)
+Choose:
+	- PickUp(a, r', p)
+
+g5 =  Agent(a) ∧ Region(r) ∧ Plate(p) ∧ Customer(C) ∧ At(C, r) ∧ Region(r') ∧ At(a, r') ∧ ¬(r'=r) ∧ Adjacent(r', r) ∧ At(a, BUFF) ∧ At(p, BUFF) ∧ ¬hasFood(p) ∧ ¬Holding(a, p) ∧ At(a, r') ∧ At(p, r')
+
+
+
+g5 satisfies initial state by substiting {a=A, p=P, r' = BUFF, c = C, r= UF}
+
+
+
+Final plan:
+
+- PickUp(A, BUFF, P)
+- Fill(A, P),
+- Move(A, BUFF, UF)
+- HandOver(A, UF, P, C)
+
+Part 4:
+4.1
+
+As the the goal is to make sure that the tea and coffee are served hot, ice cream cold, and sushi affected of time, each sub goal serving a customer should be accomplished within fixed time interval. Assuming that when the tea or coffee and ice cream are in always in good condition when they are at BUFF(says the are in a thermos flask and in fridge, respectivly), they robot should make sure that the time he fills a cup with a coffee or tea, or takes out icecream from fridge and the time it get served is meets certain time constraits, depending on how long it takes tea or coffe to get cold or iceacream to melt. Basically an actions should takes a known amount of time, and start point and end point. And make sure that they meet the specification of time contraints on the goal.
+
+Another point is that the robot must do one action making sure that other contraints are still true. It must assure that tea is served hot but also the icecream is still in good condition. if it is not out of the fridge. So the robot it would be able to handle some concurancy while performing doing actions and scheduling to make sure it meets certain contraints.
+Of course, in this case since sushi is not affected by time, either we can ignore not specify it time contraints or give it a maximum resonable time.
+
+
+
+
+4.2 
+
+In this case the goal would not only be about making sure the actions are performed in agiven time inorder to maintain some state of the goal (contraits) but also the gaol should be achieved while maintining social contraints which are the social expectations. The robot would be able to do scheduling on the actions it has to perform which will involve prioritizing. And more importantly, it should be able to inform someone who is concerned if something does not go as anticipated. 
+
+It should incorporate some of the capabilites that helps it to make smart decision to handle of situation efficently. For example utilizing shared resources. When two customers ask for tea, it does not have to serve one at time it should be able to perform certain actions that accomplish global goals as well.
+
+
+Actions and goals should have a way of quantifying things for example handling numerical quantity as people are so diverse. One person might prefer hot tea while other person might want a midly hot one. So robot could estimate how long to leave tea unserved while cooling to be served in a requested condition.  
+
+
+Also, the robot should not acts like a robot, it should be able to handle some emergencies. For instance, say when one order would take a long time say 30 minutes, while someone asks to bring them water or a tea while its ready and unordered, it would pe expected to do that first even though he or she would not have been the first one to ask you order first. And if it is so quick most people don't mind as they think it's reasonable.
+
+
+But the further problems emeges, like how does the robot be able to accomodate people with different beliefs, capabilities, cultures, or a situation when conflics rise, and other contigencies that may come up. And I think that's where learning would be imperative where the robot will learn from experience and act accordingily or able to ask some of its supervisor what to do if it has not encountered a particular situation before. - As we have seen in the lecture that people are generally not irrational. You can't fully predict how their preference should be, the fact that pddl handles deterministic situation, it should be able to handle underminstic choices as well.
+
+
+
+- Generally, the performance will depends on contraints given in the goals and how the actions are performed to preserve those contraits. Since social expectation is complicated sometimes it can be hard to evaluate the permormanace of the agent other than asking the feedback from people it serves or observing how it handles the requests it was given. 
+
+
